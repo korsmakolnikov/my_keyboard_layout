@@ -731,6 +731,8 @@ xkb_symbols "mac" {
     key <AB08> { [     comma,       less, lessthanequal,      dead_macron ] };
     key <AB09> { [    period,    greater, greaterthanequal,    dead_breve ] };
     key <AB10> { [     slash,   question,      division,     questiondown ] };
+    key <CAPS> { [    Control_L   ] };
+    key <LCTL> { [    Caps_Lock   ] };
 
     include "level3(ralt_switch)"
 };
