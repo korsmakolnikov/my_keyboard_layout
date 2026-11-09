@@ -1,0 +1,18 @@
+#!/bin/bash
+# Applies the custom layout, then applies it again every time an input
+# device is plugged in (USB, Bluetooth, reconnects after suspend): X gives
+# each new keyboard the system layout, overriding ours.
+set -euo pipefail
+
+apply="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/keyboard-layout-apply"
+
+"$apply"
+
+# a failed apply (X gone) ends the script; systemd restarts it
+while read -r line; do
+    [[ $line == *"] add "* ]] || continue
+    # one keyboard emits a burst of events and X adds it a moment later:
+    # wait for one second of quiet before applying
+    while read -r -t 1 _; do :; done
+    "$apply"
+done < <(udevadm monitor --udev --subsystem-match=input)

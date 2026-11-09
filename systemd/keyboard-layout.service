@@ -1,0 +1,12 @@
+[Unit]
+Description=Custom keyboard layout, applied again on every keyboard hotplug
+# keep retrying: at login the user manager starts before X exports DISPLAY
+StartLimitIntervalSec=0
+
+[Service]
+ExecStart=%h/.local/bin/keyboard-layout-watch
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

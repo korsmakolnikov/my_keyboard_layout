@@ -1,0 +1,7 @@
+# Swaps Caps Lock and Left Control in the kernel, for built-in AT keyboards
+# only (laptops): external USB keyboards such as the HHKB, which already has
+# Control where Caps Lock is, do not match and are left alone.
+# Installed by my_keyboard_layout/install.sh only on machines that have one.
+evdev:atkbd:*
+ KEYBOARD_KEY_3a=leftctrl
+ KEYBOARD_KEY_1d=capslock
