@@ -42,12 +42,15 @@ fi
 # 4. Ctrl/Caps Lock swap, in the kernel, for the built-in keyboard only.
 #    The condition is the built-in (AT) keyboard, not the absence of the HHKB:
 #    with the HHKB plugged into the laptop the built-in one still needs the swap,
-#    and the hwdb match leaves the HHKB (USB) untouched anyway.
+#    and the hwdb match leaves the HHKB (USB) untouched anyway. Laptops whose
+#    built-in keyboard is USB still have an AT one, so the condition holds; the
+#    hwdb file matches their USB keyboard by vendor and product.
 hwdb_src="$here/udev/90-swap-capslock-ctrl.hwdb"
 hwdb_dst="/etc/udev/hwdb.d/90-swap-capslock-ctrl.hwdb"
 
-# the real keyboards (kbd handler and the key/LED event set), one block each
-keyboards() { awk -v RS= -v ORS='\n\n' '/Handlers=[^\n]*kbd/ && /EV=1[02]0013/' /proc/bus/input/devices; }
+# the real keyboards (kbd handler and autorepeat, the EV_REP bit), one block
+# each; power buttons and hotkey devices have neither repeat nor LEDs
+keyboards() { awk -v RS= -v ORS='\n\n' '/Handlers=[^\n]*kbd/ && /EV=1[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]\n/' /proc/bus/input/devices; }
 
 reload_hwdb() {
     sudo systemd-hwdb update
@@ -67,6 +70,18 @@ elif [ -e "$hwdb_dst" ]; then
     sudo rm -f "$hwdb_dst"
     reload_hwdb
 fi
+
+# which keyboards got the swap: a built-in keyboard missing here (e.g. a USB
+# one) needs its own entry in the hwdb file
+echo "Ctrl/Caps Lock swap:"
+keyboards | grep '^H: Handlers=' | grep -o 'event[0-9]*' | while read -r ev; do
+    name="$(cat "/sys/class/input/$ev/device/name")"
+    if udevadm info "/dev/input/$ev" | grep -q '^E: KEYBOARD_KEY_.*=capslock$'; then
+        echo "  swapped:     $name"
+    else
+        echo "  not swapped: $name"
+    fi
+done
 
 # 5. retire swapcaps, replaced by step 4
 local_conf="$HOME/.config/i3/local.conf"
