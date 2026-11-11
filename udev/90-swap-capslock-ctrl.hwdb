@@ -1,7 +1,15 @@
-# Swaps Caps Lock and Left Control in the kernel, for built-in AT keyboards
+# Swaps Caps Lock and Left Control in the kernel, for built-in keyboards
 # only (laptops): external USB keyboards such as the HHKB, which already has
 # Control where Caps Lock is, do not match and are left alone.
 # Installed by my_keyboard_layout/install.sh only on machines that have one.
+
+# built-in AT keyboards
 evdev:atkbd:*
  KEYBOARD_KEY_3a=leftctrl
  KEYBOARD_KEY_1d=capslock
+
+# built-in USB keyboards, matched by vendor and product (HID usages)
+# ITE 8296, Lenovo ThinkBook 16p Gen 2 (its AT keyboard is present but unused)
+evdev:input:b0003v048DpC916*
+ KEYBOARD_KEY_70039=leftctrl
+ KEYBOARD_KEY_700e0=capslock
